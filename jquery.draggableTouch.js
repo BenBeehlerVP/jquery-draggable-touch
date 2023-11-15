@@ -12,11 +12,23 @@
  * you think this stuff is worth it, you can buy me a beer in return.
  */
 ;(function($){
+    /*
+        {
+            useTransform: value
+            noHorizontal: bool
+            noVertical: bool
+            topBound: value
+            leftBound: value
+        }
+    */
+
     $.fn.draggableTouch = function(actionOrSettings) {
         // check if the device has touch support, and if not, fallback to use mouse
         // draggableMouse which uses mouse events
         if (window.ontouchstart === undefined) {
-            return this.draggableMouse(actionOrSettings);
+            //return this.draggableMouse(actionOrSettings);
+
+            return this;
         }
 
         if (typeof(actionOrSettings) == "string") {
@@ -33,6 +45,78 @@
             }
         } else {
             var useTransform = actionOrSettings && actionOrSettings.useTransform;
+        }
+
+        horizontal = () => {
+            if(actionOrSettings == undefined || actionOrSettings == null) {
+                return true;
+            } else {
+                if(actionOrSettings.noHorizontal == null || actionOrSettings.noHorizontal == undefined)  {
+                    return true;
+                } else {
+                    return !actionOrSettings.noHorizontal;
+                }
+            }
+        };
+
+        vertical = () => {
+            if(actionOrSettings == undefined || actionOrSettings == null) {
+                return true;
+            } else {
+                if(actionOrSettings.noVertical == null || actionOrSettings.noVertical == undefined)  {
+                    return true;
+                } else {
+                    return !actionOrSettings.noVertical;
+                }
+            }
+        };
+
+        topBound = () => {
+            if(actionOrSettings == undefined || actionOrSettings == null) {
+                return null;
+            } else {
+                if(actionOrSettings.topBound == null || actionOrSettings.topBound == undefined)  {
+                    return null;
+                } else {
+                    return actionOrSettings.topBound;
+                }
+            }
+        };
+
+        leftBound = () => {
+            if(actionOrSettings == undefined || actionOrSettings == null) {
+                return null;
+            } else {
+                if(actionOrSettings.leftBound == null || actionOrSettings.noVertical == leftBound)  {
+                    return null;
+                } else {
+                    return actionOrSettings.leftBound;
+                }
+            }
+        };
+
+        canMoveHorizontal = (leftPos) => {
+            if(leftBound() == null && horizontal()) {
+                return true;
+            }
+
+            if(leftPos >= leftBound()) {
+                return false;
+            }
+
+            return horizontal();
+        }
+
+        canMoveVertical = (topPos) => {
+            if(topBound() == null && vertical()) {
+                return true;
+            }
+
+            if(topPos >= topBound()) {
+                return false;
+            }
+
+            return vertical();
         }
         
         this.each(function() {
@@ -85,15 +169,28 @@
                     if (touch.identifier != draggingTouchId) {
                         continue;
                     }
+
+                    let leftPos = touch.pageX - offset.x;
+                    let topPos = touch.pageY - offset.y;
+
+                    let newpos = { left: e.pageX, top: e.pageY };
+
+                    if(canMoveHorizontal(leftPos)) {
+                        newpos.left = leftPos;
+                    }
+
+                    if(canMoveVertical(topPos)) {
+                        newpos.top = topPos;
+                    }
+
+                    element.trigger("dragmove", newpos);
+
                     if (useTransform) {
                         $(this).css({
-                            "transform": "translate3d(" + (touch.pageX - offset.x) + "px, " + (touch.pageY - offset.y) + "px, 0px)",
+                            "transform": "translate3d(" + (leftPos) + "px, " + (topPos) + "px, 0px)",
                         });
                     } else {
-                        $(this).css({
-                            top: touch.pageY - offset.y,
-                            left: touch.pageX - offset.x
-                        });
+                        $(this).css(newpos);
                     }
                 }
             });
@@ -137,6 +234,7 @@
                     });
                 }
             };
+            
             var up = function(e) {
                 element.unbind("mouseup.draggableTouch", up);
                 $(document).unbind("mousemove.draggableTouch", move);

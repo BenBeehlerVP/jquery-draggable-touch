@@ -34,6 +34,8 @@
                     console.log("dragstart:", this, pos.left + "," + pos.top);
                 }).bind("dragend", function(e, pos) {
                     console.log("dragend:", this, pos.left + "," + pos.top);
+                }).bind("dragmove", function(e, pos) {
+                    console.log("dragmove:", this, pos.left + "," + pos.top);
                 });
             });
             
