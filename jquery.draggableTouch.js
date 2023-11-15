@@ -95,12 +95,40 @@
             }
         };
 
+        bottomBound = () => {
+            if(actionOrSettings == undefined || actionOrSettings == null) {
+                return null;
+            } else {
+                if(actionOrSettings.bottomBound == null || actionOrSettings.bottomBound == undefined)  {
+                    return null;
+                } else {
+                    return actionOrSettings.bottomBound;
+                }
+            }
+        };
+
+        rightBound = () => {
+            if(actionOrSettings == undefined || actionOrSettings == null) {
+                return null;
+            } else {
+                if(actionOrSettings.rightBound == null || actionOrSettings.noVertical == rightBound)  {
+                    return null;
+                } else {
+                    return actionOrSettings.rightBound;
+                }
+            }
+        };
+
         canMoveHorizontal = (leftPos) => {
-            if(leftBound() == null && horizontal()) {
+            if((leftBound() == null && rightBound() == null) && horizontal()) {
                 return true;
             }
 
-            if(leftPos >= leftBound()) {
+            let leftcov = ( leftBound() != null && leftPos < leftBound() );
+            let rightcov = ( rightBound() != null && leftPos >= rightBound() );
+
+            if( leftcov || 
+                rightcov ) {
                 return false;
             }
 
@@ -108,11 +136,15 @@
         }
 
         canMoveVertical = (topPos) => {
-            if(topBound() == null && vertical()) {
+            if((topBound() == null && bottomBound() == null) && vertical()) {
                 return true;
             }
 
-            if(topPos >= topBound()) {
+            let topcov = ( topBound() != null && topPos < topBound() );
+            let bottomcov = ( bottomBound() != null && topPos >= bottomBound() );
+
+            if( topcov || 
+                bottomcov ) {
                 return false;
             }
 
