@@ -44,7 +44,7 @@ Usage example
             console.log("drag ended on:", this, "at position:", pos);
         });
 
-The following options for enabling draggable touch:
+The following options for enabling draggable touch::
 
     $(".my-draggables").draggableTouch(
         {
