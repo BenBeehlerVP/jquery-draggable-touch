@@ -32,15 +32,31 @@ Usage example
     $(".my-draggables")
         .draggableTouch()
         .bind("dragstart", function(event, pos) {
+            //called when the object's drag is started on touch devices.
             console.log("drag started on:", this, "at position:", pos);
         })
+        .bind("dragmove", function(event, pos) {
+            //called when the object's drag is continued on touch devices.
+            console.log("drag continued on:", this, "at position:", pos);
+        })
         .bind("dragend", function(event, pos) {
+            //called when the object's drag is ended (let go) on touch devices.
             console.log("drag ended on:", this, "at position:", pos);
         });
 
-Set the position using :code:`transform` CSS property instead of :code:`left` and :code:`top`::
+The following options for enabling draggable touch:
 
-    $(".my-draggables").draggableTouch({useTransform:true});
+    $(".my-draggables").draggableTouch(
+        {
+            useTransform: <bool> //enables/disables movement via transform (defaults to false)
+            noHorizontal: <bool> //enables/disables horizontal movement (defaults to false)
+            noVertical: <bool> //enables/disables vertical movement (defaults to false)
+            topBound: <numerical> //sets top bound for object (defaults to unbounded)
+            leftBound: <numerical> //sets left bound for object (defaults to unbounded)
+            bottomBound: <numerical> //sets bottom bound for object (defaults to unbounded)
+            rightBound: <numerical> //sets right bound for object (defaults to unbounded)
+        }
+    );
 
 To disable dragability::
 
