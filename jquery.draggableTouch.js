@@ -150,6 +150,18 @@
 
             return vertical();
         }
+
+        var firstPos = {};
+
+        setElementInitialPosition = ( element, x, y ) => {
+            firstPos[element] = { x: x, y: y };
+        }
+
+        getFirstPosition = ( element ) => {
+            return firstPos[element];
+        }
+
+        getFirstPositions = () => { return firstPos; }
         
         this.each(function() {
             var element = $(this);
@@ -158,6 +170,9 @@
             var end = function(e) {
                 e.preventDefault();
                 var orig = e.originalEvent;
+
+                let element = $(this);
+
                 for (var i=0; i<orig.changedTouches.length; i++) {
                     var touch = orig.changedTouches[i];
                     // the only touchend/touchcancel event we care about is the touch
@@ -165,16 +180,39 @@
                     if (touch.identifier != draggingTouchId) {
                         continue;
                     }
+
+                    revertFunc = () => {
+                        if(getFirstPosition(element) != null) {
+                            let newpos = { 
+                                left: getFirstPosition(element).x,
+                                top: getFirstPosition(element).y
+                            }
+                            
+                            let ctop = element.position().top;
+                            let cleft = element.position().left;
+                            
+                            element.css({ 'top': ctop + 'px', 'left': cleft + 'px' }).animate({
+                                'top': newpos.top,
+                                'left': newpos.left
+                            }); 
+                        }  
+                    }
+
                     element.trigger("dragend", {
                         top: orig.changedTouches[0].pageY - offset.y,
-                        left: orig.changedTouches[0].pageX - offset.x
+                        left: orig.changedTouches[0].pageX - offset.x,
+                        revertFunc: revertFunc
                     });
+
                     draggingTouchId = null;
                 }
             };
             
             element.bind("touchstart.draggableTouch", function(e) {
                 e.preventDefault();
+
+                let element = $(this);
+
                 var orig = e.originalEvent;
                 // if this element is already being dragged, we can early exit, otherwise
                 // we need to store which touch started dragging the element
@@ -183,7 +221,14 @@
                 } else {
                     draggingTouchId = orig.changedTouches[0].identifier;
                 }
-                var pos = $(this).position();
+
+                var pos = element.position();
+
+                setElementInitialPosition( 
+                    element, 
+                    element.position().left,
+                    element.position().top);
+
                 offset = {
                     x: orig.changedTouches[0].pageX - pos.left,
                     y: orig.changedTouches[0].pageY - pos.top
